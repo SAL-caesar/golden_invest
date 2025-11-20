@@ -1,5 +1,10 @@
-"use client";
 export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
+"use client";
+
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabaseClient";
 
@@ -14,7 +19,6 @@ export default function WithdrawPage() {
     const load = async () => {
       const { data } = await supabase.auth.getSession();
 
-      // المستخدم لم يسجل الدخول → نرجّعو للّوجين
       if (!data.session) {
         window.location.href = "/auth/login";
         return;
@@ -22,7 +26,6 @@ export default function WithdrawPage() {
 
       setSession(data.session);
 
-      // جلب الرصيد من جدول user_wallets
       const { data: walletData } = await supabase
         .from("user_wallets")
         .select("balance")
@@ -35,17 +38,14 @@ export default function WithdrawPage() {
     load();
   }, []);
 
-  // تنفيذ طلب سحب
   const handleWithdraw = async () => {
-    setMessage("");
-
     if (!amount || !wallet) {
-      setMessage("❌ الرجاء تعبئة جميع الحقول");
+      setMessage("❌ يرجى ملء جميع الحقول");
       return;
     }
 
     if (amount > balance) {
-      setMessage("❌ المبلغ المطلوب أكبر من الرصيد المتاح");
+      setMessage("❌ المبلغ أكبر من الرصيد");
       return;
     }
 
@@ -57,9 +57,9 @@ export default function WithdrawPage() {
     });
 
     if (error) {
-      setMessage("❌ حدث خطأ أثناء إرسال طلب السحب");
+      setMessage("❌ حدث خطأ");
     } else {
-      setMessage("✅ تم إرسال طلب السحب بنجاح");
+      setMessage("✅ تم إرسال طلب السحب");
       setAmount("");
       setWallet("");
     }
@@ -70,13 +70,13 @@ export default function WithdrawPage() {
       <h1 className="text-3xl font-bold mb-4 text-center">طلب سحب الأموال</h1>
 
       <p className="text-xl mb-6 text-center">
-        <strong>الرصيد المتاح:</strong> {balance} USDT
+        <strong>الرصيد:</strong> {balance} USDT
       </p>
 
       <input
         type="number"
         className="border p-3 rounded w-full mb-3"
-        placeholder="المبلغ المطلوب"
+        placeholder="المبلغ"
         value={amount}
         onChange={(e) => setAmount(Number(e.target.value))}
       />
@@ -91,14 +91,12 @@ export default function WithdrawPage() {
 
       <button
         onClick={handleWithdraw}
-        className="bg-blue-600 text-white w-full p-3 rounded"
+        className="bg-blue-600 text-white p-3 rounded w-full"
       >
         إرسال الطلب
       </button>
 
-      {message && (
-        <p className="text-center mt-4 font-bold">{message}</p>
-      )}
+      {message && <p className="text-center mt-4">{message}</p>}
     </div>
   );
 }
