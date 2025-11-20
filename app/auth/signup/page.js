@@ -1,5 +1,10 @@
-"use client";
 export const dynamic = "force-dynamic";
+export const dynamicParams = true;
+export const fetchCache = "force-no-store";
+export const revalidate = 0;
+
+"use client";
+
 import { useState } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 
@@ -19,10 +24,8 @@ export default function SignupPage() {
     if (error) {
       setMessage("❌ خطأ في إنشاء الحساب");
     } else {
-      setMessage("✅ تم إنشاء الحساب بنجاح");
-      setTimeout(() => {
-        window.location.href = "/auth/login";
-      }, 1000);
+      setMessage("✅ تم إنشاء الحساب");
+      setTimeout(() => window.location.href = "/auth/login", 1000);
     }
   };
 
@@ -54,7 +57,7 @@ export default function SignupPage() {
       </button>
 
       {message && (
-        <p className="text-center mt-4 font-bold text-red-600">{message}</p>
+        <p className="text-center mt-4 font-bold">{message}</p>
       )}
     </div>
   );
